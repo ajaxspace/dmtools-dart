@@ -593,7 +593,10 @@ void fixtureactionstools_p1() {
       }),
     ) as Map<String, dynamic>;
     expect(body['method'], 'GET');
-    expect(body['path'], '/repos/o/r/commits/cafe123/check-runs');
+    expect(
+      body['path'],
+      '/repos/o/r/commits/cafe123/check-runs?per_page=100&page=1',
+    );
   });
 
   test('github_get_job_logs hits the job logs endpoint', () {
