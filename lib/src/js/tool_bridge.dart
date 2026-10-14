@@ -223,27 +223,55 @@ class ToolBridge {
   /// replaces that wrapper.
   String _fileReadHost(String argsJson) {
     final parsed = _decodeArgs(argsJson);
-    String? path;
-    if (parsed is Map) path = parsed['path'] as String?;
+    // Java `FileTools.readFile` parity (gh-401): accepts the string form
+    // `file_read('a.txt')` and the object form `file_read({path})`. Any
+    // other shape (number, array, object without a string `path`, no
+    // argument, null) is a wrong call: it throws, never an empty string.
+    final path = _parseFileReadPath(parsed);
+    if (path == null) {
+      return _jsError(
+        'file_read expects a path string or {path: <string>} as its '
+        'argument (got ${parsed == null ? 'no argument' : jsonEncode(parsed)})',
+      );
+    }
     stdout.writeln('Calling tool file_read with args: '
-        '${jsonEncode(parsed is Map ? parsed : const {})}');
-    return _timed('file_read', () {
-      if (path == null) return 'null';
-      final String resolved;
-      try {
-        // gh-367: the direct host is the read flavor — require() reads
-        // pack modules through here (Java `readFile` parity).
-        resolved = _sandboxReadPath(path);
-      } catch (e) {
-        stderr.writeln('file_read: $e');
-        return 'null';
-      }
-      try {
-        return jsonEncode(File(resolved).readAsStringSync());
-      } catch (_) {
-        return 'null';
-      }
-    });
+        '${jsonEncode(parsed is Map ? parsed : {'path': path})}');
+    return _timed('file_read', () => _fileReadResult(path));
+  }
+
+  /// gh-401 argument contract: the string form `file_read('a.txt')` or the
+  /// object form `file_read({path})`. Returns null for any other shape
+  /// (the caller answers with the _jsError envelope).
+  String? _parseFileReadPath(Object? parsed) {
+    if (parsed is String) return parsed;
+    if (parsed is Map && parsed['path'] is String) {
+      return parsed['path'] as String;
+    }
+    return null;
+  }
+
+  /// Read body: empty path answers null (Java parity), sandbox refusal
+  /// answers null, unreadable file answers null; success wraps the content
+  /// as a JSON string. Never throws (the JS bridge surface is total).
+  String _fileReadResult(String path) {
+    if (path.isEmpty) {
+      stderr.writeln('file_read: empty path');
+      return 'null';
+    }
+    final String resolved;
+    try {
+      // gh-367: the direct host is the read flavor — require() reads
+      // pack modules through here (Java `readFile` parity).
+      resolved = _sandboxReadPath(path);
+    } catch (e) {
+      stderr.writeln('file_read: $e');
+      return 'null';
+    }
+    try {
+      return jsonEncode(File(resolved).readAsStringSync());
+    } catch (_) {
+      return 'null';
+    }
   }
 
   /// `SetEnvVariableProxy` parity — `set_env_variable(propertyName,

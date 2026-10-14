@@ -18,6 +18,7 @@ void main() {
   _testContextInjection();
   _testExtraGlobalsFlatten();
   _testHostFunctions();
+  _testHostFunctionsBadForms();
   _testSetEnvVariable();
   _testErrorDispatch();
   _testWrapperDispatch();
@@ -163,6 +164,61 @@ void _testHostFunctions() {
           workingDirectory: dir.path,
         );
         expect(jsonDecode(result!), 'hello world');
+      } finally {
+        dir.deleteSync(recursive: true);
+      }
+    });
+
+    test(
+        'file_read accepts the string form and matches the object form (gh-401)',
+        () {
+      final dir = Directory.systemTemp.createTempSync('dmtools_fread_str');
+      try {
+        File('${dir.path}/a.txt').writeAsStringSync('content A');
+        final script = _writeScript(
+            dir,
+            'test.js',
+            'function action(params) { return {'
+                'str: file_read("a.txt"), obj: file_read({path: "a.txt"}), '
+                'missing: file_read("nope.txt") }; }');
+        final result = const JsJobRunner().runScript(
+          scriptPath: script.path,
+          jobParams: {},
+          workingDirectory: dir.path,
+        );
+        final decoded = jsonDecode(result!) as Map;
+        expect(decoded['str'], 'content A');
+        expect(decoded['obj'], 'content A');
+        expect(decoded['missing'], isNull);
+      } finally {
+        dir.deleteSync(recursive: true);
+      }
+    });
+  });
+}
+
+void _testHostFunctionsBadForms() {
+  group('host functions — bad call forms and sandbox parity', () {
+    test(
+        'file_read throws on a wrong call form instead of returning empty (gh-401)',
+        () {
+      final dir = Directory.systemTemp.createTempSync('dmtools_fread_bad');
+      try {
+        for (final call in ['42', '[]', '{}', '']) {
+          final script = _writeScript(
+              dir,
+              'test.js',
+              'function action(params) { try { file_read($call); '
+                  'return "no-throw"; } catch (e) { return String(e); } }');
+          final result = const JsJobRunner().runScript(
+            scriptPath: script.path,
+            jobParams: {},
+            workingDirectory: dir.path,
+          );
+          final message = jsonDecode(result!) as String;
+          expect(message, contains('file_read expects a path string'),
+              reason: 'call form: $call');
+        }
       } finally {
         dir.deleteSync(recursive: true);
       }
