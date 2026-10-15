@@ -26,6 +26,7 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
 import '../js/sync_http_client.dart';
+import 'pack_provenance.dart';
 
 /// The outcome of resolving a pack: the unpacked root and the entry config.
 class ResolvedPack {
@@ -75,6 +76,9 @@ class AgentPackResolver {
         _registryLookedUp = registryBaseUrl != null;
 
   final Directory _packsRoot;
+
+  /// The directory unpacked packs are cached under.
+  Directory get packsRootDir => _packsRoot;
 
   /// The configured registry base URL (env `DMTOOLS_PACK_REGISTRY`), lazily
   /// resolved and cached; `null` when no registry is configured.
@@ -157,8 +161,14 @@ class AgentPackResolver {
       final version = _manifestString(manifest, 'version');
       _validateManifestIdentity(agent, version);
 
+      final provenance = PackProvenance(
+        name: agent,
+        version: version,
+        sha256: sha256.convert(zipFile.readAsBytesSync()).toString(),
+        sourceUrl: base,
+      );
       final packRoot = Directory(p.join(_packsRoot.path, '$agent-$version'));
-      _unpackAndVerify(zipFile, manifest, packRoot);
+      _unpackAndVerify(zipFile, manifest, packRoot, provenance);
 
       final entryName =
           entryOverride ?? _manifestString(manifest, 'defaultEntry');
@@ -501,9 +511,9 @@ class AgentPackResolver {
   // Unpack + verify + cache
   // ------------------------------------------------------------------
 
-  void _unpackAndVerify(
-      File zipFile, Map<String, dynamic> manifest, Directory packRoot) {
-    if (_isCacheHit(packRoot, manifest)) return;
+  void _unpackAndVerify(File zipFile, Map<String, dynamic> manifest,
+      Directory packRoot, PackProvenance provenance) {
+    if (_isCacheHit(packRoot, manifest, provenance)) return;
 
     // Stage the unpack next to the cache (same filesystem) so the publish
     // rename stays atomic — a Directory.systemTemp staging dir fails with
@@ -513,6 +523,7 @@ class AgentPackResolver {
     try {
       final hashes = _manifestHashes(manifest);
       _unzipSafe(zipFile, tmp, hashes);
+      provenance.write(tmp);
       packRoot.parent.createSync(recursive: true);
       _deleteWithinPacksRoot(packRoot);
       tmp.renameSync(packRoot.path); // atomic publish
@@ -535,13 +546,18 @@ class AgentPackResolver {
     if (dir.existsSync()) dir.deleteSync(recursive: true);
   }
 
-  bool _isCacheHit(Directory packRoot, Map<String, dynamic> manifest) {
+  /// A cache hit needs the same manifest, the same zip sha256 and the same
+  /// source URL (registry base included): a same-version pack with different
+  /// content or a re-pinned registry is a miss and gets re-unpacked (gh-375).
+  bool _isCacheHit(Directory packRoot, Map<String, dynamic> manifest,
+      PackProvenance provenance) {
     final cachedManifest = File(p.join(packRoot.path, 'manifest.json'));
     if (!cachedManifest.existsSync()) return false;
     try {
       final cached =
           jsonDecode(cachedManifest.readAsStringSync()) as Map<String, dynamic>;
       if (_stableHash(cached) != _stableHash(manifest)) return false;
+      if (!provenance.matches(PackProvenance.read(packRoot))) return false;
       return _cachedFilesIntact(packRoot, manifest);
     } on Object {
       return false;

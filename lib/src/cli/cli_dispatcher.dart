@@ -26,6 +26,8 @@ import '../js/tool_bridge.dart';
 import '../mcp/default_tool_registry.dart';
 import '../mcp/tool_param.dart';
 import '../mcp/tool_registry.dart';
+import '../pack/agent_pack_resolver.dart';
+import '../pack/pack_provenance.dart';
 import '../version.dart';
 import 'doctor_command.dart';
 import 'help_text.dart';
@@ -55,14 +57,16 @@ class CliDispatcher {
     void Function(String line)? errorWriter,
     PropertyReader? propertyReader,
     bool Function()? isTty,
-    AsyncJobPool? asyncPool,
-    SyncWorkerPool? confluencePool,
+    CliDispatcherPools pools = const CliDispatcherPools(),
   })  : _writer = writer ?? print,
         _errorWriter = errorWriter ?? stderr.writeln,
         _reader = propertyReader ?? PropertyReader(),
         _isTty = isTty ?? _stdoutIsTty,
-        _asyncPool = asyncPool,
-        _confluencePool = confluencePool;
+        _asyncPool = pools.asyncPool,
+        _confluencePool = pools.confluencePool,
+        _packResolver = pools.packResolver;
+
+  final AgentPackResolver? _packResolver;
 
   final void Function(String line) _writer;
   final void Function(String line) _errorWriter;
@@ -142,6 +146,45 @@ class CliDispatcher {
   int _runCompile(List<String> rest) =>
       CompileCommand(writer: _writer).run(rest);
 
+  /// Resolves [rest] once when it targets a versioned agent pack, else null.
+  ///
+  /// Best-effort: a resolution failure yields null (the run proceeds without
+  /// provenance enrichment — fail open). The result is reused by the run path
+  /// so a remote pack is downloaded and unpacked only once per `dmtools run`.
+  ResolvedPack? _pinnedPackFor(List<String> rest, AgentPackResolver resolver) {
+    if (rest.isEmpty || !resolver.isPack(rest.first)) return null;
+    try {
+      return resolver.resolve(rest.first,
+          githubToken: PropertyReader().getGithubToken());
+    } on Object {
+      return null;
+    }
+  }
+
+  /// gh-375: a missing `require` inside a pack surfaces as a raw JS error
+  /// from the job run. Log the pack's provenance (name, version, sha256,
+  /// source URL) on one line before rethrowing, so the failure names the
+  /// exact zip that ran. Non-matching failures rethrow untouched.
+  Future<int> _withPackProvenanceOnFailure(
+    Directory? packRoot,
+    Future<int> Function() body,
+  ) async {
+    if (packRoot == null) return body();
+    try {
+      return await body();
+    } on Object catch (e) {
+      final message = e.toString();
+      if (message.contains(packMissingModuleMarker) ||
+          message.contains(packMissingFileMarker)) {
+        final provenance = PackProvenance.read(packRoot);
+        if (provenance != null) {
+          _writer('ERROR: ${provenance.describe()}');
+        }
+      }
+      rethrow;
+    }
+  }
+
   /// Runs a job: resolve config → parse name/params → execute → print result.
   ///
   /// Returns `0` on success, `1` on any error (bad config, unknown job,
@@ -153,12 +196,26 @@ class CliDispatcher {
       _writer('Usage: dmtools run <json-file> [encoded] [--key value ...]');
       return 1;
     }
+    final resolver = _packResolver ?? AgentPackResolver();
+    final pinned = _pinnedPackFor(rest, resolver);
+    final packRoot = pinned?.packRoot;
     try {
-      final resolved = RunCommandProcessor().process(['run', ...rest]);
+      final resolved = RunCommandProcessor(
+        packResolver: pinned == null
+            ? _packResolver
+            : _PinnedPackResolver(
+                resolver,
+                rest.first,
+                pinned,
+              ),
+      ).process(['run', ...rest]);
       final config = jsonDecode(resolved) as Map<String, dynamic>;
       final name = (config['name'] as String?) ?? '<unnamed>';
       final params = (config['params'] as Map<String, dynamic>?) ?? const {};
-      return await _executeJob(name, params);
+      return await _withPackProvenanceOnFailure(
+        packRoot,
+        () => _executeJob(name, params),
+      );
     } on ArgumentError catch (e) {
       _writer('Error: ${e.message}');
       return 1;
@@ -667,4 +724,54 @@ class CliDispatcher {
   /// Help text, byte-identical to the Java `JobRunner.printHelp()`
   /// output (kept in [cliHelpText] — the file line-count gate).
   static const String helpText = cliHelpText;
+}
+
+/// Rarely-wired execution seams for [CliDispatcher] — pools and the pack
+/// resolver test seam — grouped so the constructor stays within the
+/// method_size param limit.
+class CliDispatcherPools {
+  /// Creates the seams; every field defaults to production wiring.
+  const CliDispatcherPools(
+      {this.asyncPool, this.confluencePool, this.packResolver});
+
+  /// Async JS job pool override (worker dispatch tests).
+  final AsyncJobPool? asyncPool;
+
+  /// Confluence sync pool override (pool boot tests).
+  final SyncWorkerPool? confluencePool;
+
+  /// Agent pack resolver override (gh-375 provenance tests).
+  final AgentPackResolver? packResolver;
+}
+
+/// Serves one already-resolved pack for [_target]; every other pack call is
+/// forwarded to [_inner], so `dmtools run` runs the pack it reports provenance for.
+class _PinnedPackResolver extends AgentPackResolver {
+  _PinnedPackResolver(this._inner, this._target, this._pinned)
+      : super(packsRoot: _inner.packsRootDir);
+
+  final AgentPackResolver _inner;
+  final String _target;
+  final ResolvedPack _pinned;
+
+  @override
+  ResolvedPack resolve(String runArg, {String? githubToken}) =>
+      runArg == _target
+          ? _pinned
+          : _inner.resolve(runArg, githubToken: githubToken);
+
+  @override
+  bool isPack(String? runArg) => _inner.isPack(runArg);
+
+  @override
+  bool isRegistryRefShaped(String? runArg) =>
+      _inner.isRegistryRefShaped(runArg);
+
+  @override
+  bool get hasRegistry => _inner.hasRegistry;
+
+  @override
+  void rewritePathsToPackRoot(
+          Map<String, dynamic> config, Directory packRoot) =>
+      _inner.rewritePathsToPackRoot(config, packRoot);
 }
