@@ -314,7 +314,7 @@ void workItemCatalogParamShapeTests() {
 
     test('ado_add_work_item_comment declares id and comment (text alias)', () {
       final tool = toolNamed('ado_add_work_item_comment');
-      expect(tool.params.map((p) => p.name), ['id', 'comment']);
+      expect(tool.params.map((p) => p.name), ['id', 'comment', 'format']);
       expect(tool.params[1].aliases, ['text']);
     });
 
@@ -481,9 +481,13 @@ class _WorkItemSpy extends AdoClient {
   }
 
   @override
-  Future<Map<String, dynamic>> addWorkItemComment(int id, String text) {
+  Future<Map<String, dynamic>> addWorkItemComment(
+    int id,
+    String text, {
+    String? format,
+  }) {
     calls.add('addWorkItemComment:$id:$text');
-    return super.addWorkItemComment(id, text);
+    return super.addWorkItemComment(id, text, format: format);
   }
 
   @override
