@@ -1,5 +1,5 @@
 # Merge Trigger — thin stub over the canonical pr_approved merge bot.
-# All logic lives in IstiN/dmtools-agentic-workflows/.github/workflows/
+# All logic lives in ajaxspace/dmtools-agentic-workflows/.github/workflows/
 # factory-merge-trigger.yml; the event triggers stay repo-side
 # (workflow_run on Quality + issues:labeled re-entry — the label event
 # must not be swallowed when CI hasn't run yet).
@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   merge-trigger:
-    uses: IstiN/dmtools-agentic-workflows/.github/workflows/factory-merge-trigger.yml@main
+    uses: ajaxspace/dmtools-agentic-workflows/.github/workflows/factory-merge-trigger.yml@main
     with:
       runner: ubuntu-latest
       remove_pr_label: true

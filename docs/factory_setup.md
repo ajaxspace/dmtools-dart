@@ -41,8 +41,8 @@ Everything below is the concrete wiring, in the order you would set it up.
 | **Factory pack** | The machine itself (guard, legs, verdict, sessions) | `agents/.github/workflows/factory/` (pinned submodule) |
 | **Merge trigger** | Squash-merges `pr_approved` PRs once CI is green | `.github/workflows/merge-trigger.yml` |
 | **Runner wiring** | Per-leg runner configs + the leg → runner mapping | `.dmtools/runners/` + `.dmtools/config.js` (in-repo) |
-| **agents submodule** | Agent instructions, job configs, `run-agent.sh` (provider layer) | `agents/` → [IstiN/dmtools-agents](https://github.com/IstiN/dmtools-agents) |
-| **dmtools CLI** | Job orchestrator: runs the Teammate/CliAgent lifecycle, JS actions, tool bridge | pinned release bundle ([releases](https://github.com/epam/dmtools-dart/releases)) |
+| **agents submodule** | Agent instructions, job configs, `run-agent.sh` (provider layer) | `agents/` → [ajaxspace/dmtools-agents](https://github.com/ajaxspace/dmtools-agents) |
+| **dmtools CLI** | Job orchestrator: runs the Teammate/CliAgent lifecycle, JS actions, tool bridge | pinned release bundle ([releases](https://github.com/ajaxspace/dmtools-dart/releases)) |
 | **fa CLI** | The agent harness itself: sessions, tool calls, `--log-file` transcript | [flutter_agent_harness](https://github.com/IstiN/flutter_agent_harness) releases |
 
 The layering is strictly one-directional: the workflow only knows dmtools;
@@ -106,7 +106,7 @@ inside the fa subprocess scope.
    `config.js` (the `sm.runners` leg → runner mapping the factory guard
    reads).
 2. **`agents/` submodule** — add
-   `git submodule add https://github.com/IstiN/dmtools-agents.git agents`.
+   `git submodule add https://github.com/ajaxspace/dmtools-agents.git agents`.
    It carries:
    - `.github/workflows/factory/` — the reusable machine loop itself
      (`teammate.yml`, `sm.yml`) that the stubs call;

@@ -108,7 +108,7 @@ void _upgradeInstallerTests() {
       expect(code, 0);
       expect(
         url,
-        'https://github.com/epam/dmtools-dart/releases/download/v0.1.60/install.sh',
+        'https://github.com/ajaxspace/dmtools-dart/releases/download/v0.1.60/install.sh',
       );
       expect(seenEnv?['DMTOOLS_VERSION'], '0.1.60');
     });

@@ -1,8 +1,8 @@
 # Machine SM — thin stub over the FROZEN machine loop
-# (IstiN/dmtools-agentic-workflows, reusable).
+# (ajaxspace/dmtools-agentic-workflows, reusable).
 #
 # The whole reconcile tick (version resolution, dmtools install, pack
-# run) lives in IstiN/dmtools-agentic-workflows/.github/workflows/factory-sm.yml.
+# run) lives in ajaxspace/dmtools-agentic-workflows/.github/workflows/factory-sm.yml.
 # This file carries only the triggers (cron + manual dry dispatch) and the
 # call. NO caller-side concurrency: the factory owns the `machine-sm`
 # group — a caller declaring the same group deadlocks the called workflow
@@ -17,8 +17,6 @@ run-name: >-
   github.event.inputs.dryRun == 'true' && ' (dry)' || '' }}
 
 on:
-  schedule:
-    - cron: '*/10 * * * *'   # short ticks — the engine idles when busy
   workflow_dispatch:
     inputs:
       dryRun:
@@ -109,7 +107,7 @@ jobs:
 
   sm:
     needs: pick
-    # Machine loop — tracks IstiN/dmtools-agentic-workflows main
+    # Machine loop — tracks ajaxspace/dmtools-agentic-workflows main
     # (always-latest policy, owner directive 2026-10-04: fixes go live on
     # merge; awf pushes stay review-gated). Agent code and the dmtools CLI
     # are NOT tied to this ref: they resolve from RELEASES at run time by
@@ -117,7 +115,7 @@ jobs:
     #   vars.AGENTS_VERSION  — dmtools-agents release tag ('latest' default)
     #   vars.DMTOOLS_VERSION — dmtools-dart CLI release tag ('latest' default)
     # Guarded by test/machine_kit/factory_stub_ref_test.dart.
-    uses: IstiN/dmtools-agentic-workflows/.github/workflows/factory-sm.yml@main
+    uses: ajaxspace/dmtools-agentic-workflows/.github/workflows/factory-sm.yml@main
     with:
       # Bitrise Build Hub pool (epam-org visible; probe #229).
       runner: ${{ needs.pick.outputs.runner }}

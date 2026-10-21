@@ -1,6 +1,6 @@
 # DMTools CLI Installation Script for Windows PowerShell (Dart port).
-# Usage:  irm https://github.com/epam/dmtools-dart/releases/latest/download/install.ps1 | iex
-# Pinned: $env:DMTOOLS_VERSION="v0.1.11"; irm https://raw.githubusercontent.com/epam/dmtools-dart/v0.1.11/install.ps1 | iex
+# Usage:  irm https://github.com/ajaxspace/dmtools-dart/releases/latest/download/install.ps1 | iex
+# Pinned: $env:DMTOOLS_VERSION="v0.1.11"; irm https://raw.githubusercontent.com/ajaxspace/dmtools-dart/v0.1.11/install.ps1 | iex
 #
 # Mirrors the dm.ai Java installer layout: installs under
 # %USERPROFILE%\.dmtools\bin, writes a dmtools.cmd launcher beside the exe
@@ -9,7 +9,7 @@
 
 $ErrorActionPreference = "Stop"
 
-$REPO = "epam/dmtools-dart"
+$REPO = "ajaxspace/dmtools-dart"
 $ASSET = "dmtools-windows-x64.zip"
 $INSTALL_DIR = if ($env:DMTOOLS_INSTALL_DIR) { $env:DMTOOLS_INSTALL_DIR } else { "$env:USERPROFILE\.dmtools" }
 $BIN_DIR = "$INSTALL_DIR\bin"

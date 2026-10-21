@@ -62,7 +62,7 @@ void _versionValidation() {
     ]);
     expect(
       h.downloads.first,
-      'https://github.com/epam/dmtools-dart/releases/download/v1.2.3/install.sh',
+      'https://github.com/ajaxspace/dmtools-dart/releases/download/v1.2.3/install.sh',
     );
   });
 
@@ -70,7 +70,7 @@ void _versionValidation() {
     expect(await h.cmd().run([]), 0);
     expect(
       h.downloads.single,
-      'https://github.com/epam/dmtools-dart/releases/latest/download/install.sh',
+      'https://github.com/ajaxspace/dmtools-dart/releases/latest/download/install.sh',
     );
     expect(h.installs.single, isNot(contains('DMTOOLS_VERSION')));
   });

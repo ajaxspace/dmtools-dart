@@ -7,7 +7,7 @@ DMTools-dart is the pure-Dart port of [DMTools](https://github.com/epam/dm.ai) (
 ## Getting Started
 
 ```bash
-git clone https://github.com/epam/dmtools-dart.git
+git clone https://github.com/ajaxspace/dmtools-dart.git
 cd dmtools-dart
 
 dart pub get
@@ -76,11 +76,11 @@ See the conventions in [AGENTS.md](AGENTS.md) and the existing per-integration c
 
 ## Reporting Bugs
 
-Please open a [GitHub Issue](https://github.com/epam/dmtools-dart/issues) with:
+Please open a [GitHub Issue](https://github.com/ajaxspace/dmtools-dart/issues) with:
 - A minimal reproduction case
 - Your DMTools version (`dmtools --version`)
 - Operating system
 
 ## Questions
 
-Open a [GitHub Issue](https://github.com/epam/dmtools-dart/issues) with the `question` label for questions and ideas.
+Open a [GitHub Issue](https://github.com/ajaxspace/dmtools-dart/issues) with the `question` label for questions and ideas.
