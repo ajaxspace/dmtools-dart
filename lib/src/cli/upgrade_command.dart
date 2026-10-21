@@ -15,7 +15,7 @@ import '../version.dart';
 
 /// Default installer location for the latest release.
 const String _latestInstallUrl =
-    'https://github.com/epam/dmtools-dart/releases/latest/download/install.sh';
+    'https://github.com/ajaxspace/dmtools-dart/releases/latest/download/install.sh';
 
 /// Accepted version shapes: `1.2.3`, optional `v`, optional pre-release tag.
 /// Anything else would change the installer URL or reach `install.sh` raw.
@@ -139,7 +139,7 @@ class UpgradeCommand {
     if (override != null && override.isNotEmpty) return override;
     if (version.isEmpty) return _latestInstallUrl;
     final tag = version.startsWith('v') ? version : 'v$version';
-    return 'https://github.com/epam/dmtools-dart/releases/download/$tag/install.sh';
+    return 'https://github.com/ajaxspace/dmtools-dart/releases/download/$tag/install.sh';
   }
 
   static Future<String?> _defaultFetch(String url) async {

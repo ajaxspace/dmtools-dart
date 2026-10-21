@@ -19,7 +19,7 @@ scripting runtime via `dart:ffi`. No JVM, no GraalVM — Dart only.
 
 ```bash
 curl -fsSL \
-  "https://github.com/epam/dmtools-dart/releases/latest/download/install.sh" | sh
+  "https://github.com/ajaxspace/dmtools-dart/releases/latest/download/install.sh" | sh
 ```
 
 The repository is public — no token required. (`DMTOOLS_GITHUB_TOKEN` is
@@ -43,17 +43,17 @@ Three entry points, exactly the dm.ai shape:
 
 ```bat
 REM cmd.exe / curl — bootstraps the PowerShell installer
-curl -fsSL https://raw.githubusercontent.com/epam/dmtools-dart/main/install.bat -o "%TEMP%\dmtools-install.bat" && "%TEMP%\dmtools-install.bat"
+curl -fsSL https://raw.githubusercontent.com/ajaxspace/dmtools-dart/main/install.bat -o "%TEMP%\dmtools-install.bat" && "%TEMP%\dmtools-install.bat"
 ```
 
 ```powershell
 # PowerShell one-liner
-irm https://github.com/epam/dmtools-dart/releases/latest/download/install.ps1 | iex
+irm https://github.com/ajaxspace/dmtools-dart/releases/latest/download/install.ps1 | iex
 ```
 
 ```bash
 # Git Bash — the same install.sh as on Linux/macOS
-curl -fsSL https://raw.githubusercontent.com/epam/dmtools-dart/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ajaxspace/dmtools-dart/main/install.sh | bash
 ```
 
 All three install to `%USERPROFILE%\.dmtools\bin` (`dmtools.exe`, the
@@ -105,7 +105,7 @@ nightly and on demand — never per-PR — via
 its own matrix slot with its own concurrency group.
 
 Repo automation (dm.ai parity): the
-[agents/](agents) submodule pins [IstiN/dmtools-agents](https://github.com/IstiN/dmtools-agents)
+[agents/](agents) submodule pins [ajaxspace/dmtools-agents](https://github.com/ajaxspace/dmtools-agents)
 and feeds the L4 suite; [machine-sm.yml](.github/workflows/machine-sm.yml)
 reconciles the loop every 10 min (silent branch refresh + dispatch-only CI:
 pushes fire no workflows, the SM validates heads via `workflow_dispatch`);
@@ -147,7 +147,7 @@ agent scripts. The abstraction contract is specified in
 [GOAL.md](GOAL.md) ("Core abstractions").
 
 ```bash
-DEFAULT_TRACKER=github dmtools tracker_get_ticket --data '{"key": "epam/dmtools-dart#38"}'
+DEFAULT_TRACKER=github dmtools tracker_get_ticket --data '{"key": "ajaxspace/dmtools-dart#38"}'
 ```
 
 Alias calls dispatch the resolved carrier tool with its real credentials —

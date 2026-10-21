@@ -1,6 +1,6 @@
 # SM merge guard — thin stub over the canonical alarm in the factory home.
 # All logic lives in
-# IstiN/dmtools-agentic-workflows/.github/workflows/factory-sm-merge-guard.yml
+# ajaxspace/dmtools-agentic-workflows/.github/workflows/factory-sm-merge-guard.yml
 # (+ scripts/sm_merge_guard.py there); this repo's validation CI is
 # `quality.yml` (dispatched by the Machine SM as workflow_dispatch before
 # every merge — the exact tree-coverage invariant the guard asserts).
@@ -26,6 +26,6 @@ jobs:
     # Tracks dmtools-agentic-workflows @main — always-latest policy (owner
     # directive 2026-10-04, kicker parity): guard fixes go live on merge,
     # no re-pin ceremony.
-    uses: IstiN/dmtools-agentic-workflows/.github/workflows/factory-sm-merge-guard.yml@main
+    uses: ajaxspace/dmtools-agentic-workflows/.github/workflows/factory-sm-merge-guard.yml@main
     with:
       ci_workflow: quality.yml

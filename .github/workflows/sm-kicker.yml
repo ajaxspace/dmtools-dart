@@ -1,6 +1,6 @@
 # SM kicker — thin stub over the canonical watchdog in the factory home.
 # All logic (sm-liveness + head-completeness) lives in
-# IstiN/dmtools-agentic-workflows/.github/workflows/factory-sm-kicker.yml.
+# ajaxspace/dmtools-agentic-workflows/.github/workflows/factory-sm-kicker.yml.
 # Parity with fa (sm-kicker.yml) and dmtools-agents (factory-sm-kicker.yml).
 #
 # Why dmd needs it: GitHub silently drops schedule() crons on quiet repos —
@@ -15,8 +15,6 @@ run-name: '🥁 kicker ${{ github.event_name }} ${{ github.ref_name }}'
 on:
   push:
     branches-ignore: [main]
-  schedule:
-    - cron: '13,43 * * * *'
   # Event-driven wake-up (2026-10-03): GitHub starved BOTH crons (machine-sm
   # AND this kicker) for 100 minutes on a quiet afternoon — a green
   # validation verdict sat unlatched the whole time and dart#337 stalled
@@ -36,7 +34,7 @@ permissions:
 
 jobs:
   kicker:
-    uses: IstiN/dmtools-agentic-workflows/.github/workflows/factory-sm-kicker.yml@main
+    uses: ajaxspace/dmtools-agentic-workflows/.github/workflows/factory-sm-kicker.yml@main
     with:
       sm_workflow: machine-sm.yml
       ci_workflow: quality.yml

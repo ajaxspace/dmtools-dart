@@ -6,11 +6,11 @@ import 'package:test/test.dart';
 /// (installers, README, `--help`) must point at this repository or at a
 /// known external project — never at an abandoned or foreign distribution repo.
 void main() {
-  const ownRepo = 'epam/dmtools-dart';
+  const ownRepo = 'ajaxspace/dmtools-dart';
 
   // External projects legitimately referenced from the install surface.
   const externalRepos = {
-    'IstiN/dmtools-agents',
+    'ajaxspace/dmtools-agents',
     'IstiN/flutter_agent_harness',
     'IstiN/crap4dart',
     'epam/dm.ai', // Java sibling distribution

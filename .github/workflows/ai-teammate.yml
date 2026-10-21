@@ -1,6 +1,6 @@
 # AI Teammate — thin stub over the factory home (dmtools-agentic-workflows).
 #
-# ALL logic lives in IstiN/dmtools-agentic-workflows/.github/workflows/
+# ALL logic lives in ajaxspace/dmtools-agentic-workflows/.github/workflows/
 # factory-teammate.yml (guard, legs, verdict, sessions, memory). This file carries
 # only what cannot live in a reusable workflow: the repository event
 # triggers, the per-issue concurrency group, and the call itself.
@@ -157,7 +157,7 @@ jobs:
     # main, always-latest per owner 2026-10-04). The old factory_ref
     # engine-pin is gone: it was the agents-submodule lockstep relic,
     # unread by anything since dart#412 (awf#39 deprecates the input).
-    uses: IstiN/dmtools-agentic-workflows/.github/workflows/factory-teammate.yml@main
+    uses: ajaxspace/dmtools-agentic-workflows/.github/workflows/factory-teammate.yml@main
     with:
       # Legs need a dart toolchain: rework legs must reproduce the repo's
       # own gates locally (dart analyze/test/format, crap4dart check)

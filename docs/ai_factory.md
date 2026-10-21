@@ -246,7 +246,7 @@ agents/.github/workflows/factory/teammate.yml
 .dmtools/runners/*.json                     provider pinning per leg (this page §3)
 .dmtools/config.js                          sm.runners: leg → runner wiring
 install.sh (repo root)                      dmtools bundle installer (linux/macos/windows)
-agents/ (submodule → IstiN/dmtools-agents)  instructions, job configs, run-agent.sh,
+agents/ (submodule → ajaxspace/dmtools-agents)  instructions, job configs, run-agent.sh,
                                              setup/ scripts, factory reusable workflows
 .dmtools/fa-sessions/ (gitignored)          session tree; transport = fa-sess/gh-<n> branches
 .fah/memory/                                fa project memory, committed to the repo
@@ -255,6 +255,6 @@ AGENTS.md §8                                session-reuse operating notes (in-r
 ```
 
 The one upstream dependency to watch: the `agents/` submodule pointer moves
-via PRs to [IstiN/dmtools-agents](https://github.com/IstiN/dmtools-agents);
+via PRs to [ajaxspace/dmtools-agents](https://github.com/ajaxspace/dmtools-agents);
 fa and quickjs_runtime likewise live in their own repositories (fork + PR,
 never vendored).

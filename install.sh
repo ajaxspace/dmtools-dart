@@ -1,7 +1,7 @@
 #!/bin/sh
 # install.sh — one-line installer for the dmtools CLI (Dart port).
 #
-#   curl -fsSL "https://github.com/epam/dmtools-dart/releases/latest/download/install.sh" | sh
+#   curl -fsSL "https://github.com/ajaxspace/dmtools-dart/releases/latest/download/install.sh" | sh
 #
 # What it does:
 #   1. Detects OS and architecture.
@@ -26,7 +26,7 @@
 
 set -eu
 
-REPO="epam/dmtools-dart"
+REPO="ajaxspace/dmtools-dart"
 BINARY="dmtools"
 
 # ── Output helpers ──────────────────────────────────────────────────────────

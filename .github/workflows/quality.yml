@@ -42,7 +42,7 @@ jobs:
         # rerun of a failed job reuses the same SHA.
         id: agents
         run: |
-          SHA=$(git ls-remote https://github.com/IstiN/dmtools-agents.git refs/heads/main | cut -f1)
+          SHA=$(git ls-remote https://github.com/ajaxspace/dmtools-agents.git refs/heads/main | cut -f1)
           [[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::cannot resolve dmtools-agents main"; exit 1; }
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
           echo "### dmtools-agents SHA: \`${SHA:0:12}\`" >> "$GITHUB_STEP_SUMMARY"
